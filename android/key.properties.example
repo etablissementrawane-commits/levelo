@@ -1,0 +1,6 @@
+# Copy this file to android/key.properties and replace every placeholder.
+# Store the .p12 file at android/app/levelo-upload.p12, or update storeFile.
+storeFile=app/levelo-upload.p12
+storePassword=REPLACE_WITH_KEYSTORE_PASSWORD
+keyPassword=REPLACE_WITH_KEY_PASSWORD
+keyAlias=REPLACE_WITH_ALIAS

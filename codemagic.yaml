@@ -1,0 +1,58 @@
+workflows:
+  ios-testflight:
+    name: Levelo iOS - TestFlight
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    # In Codemagic, create an App Store Connect integration with this exact
+    # name, or change the value below to match your integration's name.
+    integrations:
+      app_store_connect: levelo_app_store_connect
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.levelo.habitsgame
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+
+    scripts:
+      - name: Initialize signing keychain
+        script: keychain initialize
+
+      - name: Fetch App Store signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --platform IOS \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Install signing certificates
+        script: keychain add-certificates
+
+      - name: Apply provisioning profiles
+        script: xcode-project use-profiles
+
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios
+          pod install
+
+      - name: Build signed iOS app
+        script: |
+          flutter build ipa --release \
+            --build-number="$PROJECT_BUILD_NUMBER" \
+            --export-options-plist="$HOME/export_options.plist"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
