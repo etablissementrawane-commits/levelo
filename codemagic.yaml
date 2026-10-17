@@ -1,48 +1,40 @@
 workflows:
   ios-testflight:
-    name: Levelo iOS - TestFlight
-    max_build_duration: 120
+    name: "Levelo: Gamify Habits"
+    max_build_duration: 60
     instance_type: mac_mini_m2
 
-    # In Codemagic, create an App Store Connect integration with this exact
-    # name, or change the value below to match your integration's name.
+    # This must match the App Store Connect integration name in Codemagic.
     integrations:
-      app_store_connect: levelo_app_store_connect
+      app_store_connect: "Yamna Mojahid"
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.levelo.habitsgame
       flutter: stable
       xcode: latest
       cocoapods: default
+      vars:
+        BUNDLE_ID: com.levelo.habitsgame
+      ios_signing:
+        # These are the reference names of the profile and certificate uploaded
+        # under Codemagic Team settings > codemagic.yaml settings > Code signing identities.
+        provisioning_profiles:
+          - LeveloProf
+        certificates:
+          - DogCer
 
     scripts:
-      - name: Initialize signing keychain
-        script: keychain initialize
-
-      - name: Fetch App Store signing files
-        script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --platform IOS \
-            --type IOS_APP_STORE \
-            --create
-
-      - name: Install signing certificates
-        script: keychain add-certificates
-
-      - name: Apply provisioning profiles
-        script: xcode-project use-profiles
-
       - name: Get Flutter packages
         script: flutter pub get
 
-      - name: Install CocoaPods dependencies
+      - name: Install CocoaPods
         script: |
           cd ios
           pod install
 
-      - name: Build signed iOS app
+      - name: Set up code signing
+        script: xcode-project use-profiles
+
+      - name: Build signed Flutter IPA
         script: |
           flutter build ipa --release \
             --build-number="$PROJECT_BUILD_NUMBER" \
@@ -50,9 +42,18 @@ workflows:
 
     artifacts:
       - build/ios/ipa/*.ipa
+      - build/ios/archive/*.xcarchive
       - /tmp/xcodebuild_logs/*.log
 
     publishing:
+      email:
+        recipients:
+          - yamna.light@icloud.com
+        notify:
+          success: true
+          failure: true
+
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+        # Add submit_to_app_store: true when the app record and store listing are ready.
