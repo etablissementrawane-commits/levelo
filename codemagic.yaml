@@ -6,7 +6,7 @@ workflows:
 
     # This must match the App Store Connect integration name in Codemagic.
     integrations:
-      app_store_connect: "Yamna Mojahid"
+      app_store_connect: Yamna Mojahid
 
     environment:
       flutter: stable
