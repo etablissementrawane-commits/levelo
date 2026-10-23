@@ -11,6 +11,7 @@ import 'core/game_config.dart';
 import 'logic/game_engine.dart';
 import 'logic/rollover_service.dart';
 import 'logic/stored_map_decoder.dart';
+import 'services/ad_startup_service.dart';
 import 'services/unity_ads_service.dart';
 
 const _uuid = Uuid();
@@ -227,7 +228,6 @@ class AppState extends ChangeNotifier {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  unawaited(UnityAdsService.instance.initialize());
   runApp(const LeveloBootstrap());
 }
 
@@ -375,6 +375,7 @@ class QuestApp extends ConsumerStatefulWidget {
 class _QuestAppState extends ConsumerState<QuestApp>
     with WidgetsBindingObserver {
   bool _stateReady = false;
+  bool _adsStartupScheduled = false;
 
   @override
   void initState() {
@@ -404,6 +405,12 @@ class _QuestAppState extends ConsumerState<QuestApp>
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(appStateProvider);
+    if (_stateReady && s.onboarded && !_adsStartupScheduled) {
+      _adsStartupScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(AdStartupService.initialize());
+      });
+    }
     final dark = s.dark;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
