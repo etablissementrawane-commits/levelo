@@ -1027,13 +1027,10 @@ Future<void> _edit(
             MediaQuery.sizeOf(context).height -
             MediaQuery.viewInsetsOf(context).bottom -
             36;
-        return AnimatedPadding(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-          ),
-          child: Dialog(
+        // Dialog already animates around MediaQuery.viewInsets when the
+        // keyboard appears. Adding another bottom-inset padding here applied
+        // the keyboard height twice, leaving only a thin strip of the form.
+        return Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.symmetric(
               horizontal: 28,
@@ -1247,8 +1244,7 @@ Future<void> _edit(
                 ),
               ),
             ),
-          ),
-        );
+          );
       },
     ),
   );
