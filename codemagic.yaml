@@ -36,8 +36,10 @@ workflows:
 
       - name: Build signed Flutter IPA
         script: |
+          BUILD_NUMBER=$((PROJECT_BUILD_NUMBER + 2))
           flutter build ipa --release \
-            --build-number="$PROJECT_BUILD_NUMBER" \
+            --build-name=1.0.1 \
+            --build-number="$BUILD_NUMBER" \
             --export-options-plist="$HOME/export_options.plist"
 
     artifacts:
